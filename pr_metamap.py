@@ -25,10 +25,17 @@ str = []
 n = 0
 for concept in concepts:
     # if n != int(concept.index):
-    if True:
+    '''
+    Concept : 
+    Index 儲存行的資訊
+    semtype 儲存 semantic type 的資訊
+    '''
+    if n != int(concept.index):
         print("Index:"+concept.index)
-    print("CUI:"+concept.cui, "SMT:"+concept.semtypes, "POS:"+concept.pos_info,
-          "PREFER_N:"+concept.preferred_name, "NEGATED:"+mmip.trigger_parser(concept.trigger)[5], "TRIGGER:"+concept.trigger)
-    # print(concept)
-    n += 1
+        n += 1
+    if concept.semtypes == "[clnd]" or concept.semtypes == "[dsyn]" :
+        print("CUI:"+concept.cui, "SMT:"+concept.semtypes, "POS:"+concept.pos_info, 
+        "PREFER_N:"+concept.preferred_name, "NEGATED:"+mmip.trigger_parser(concept.trigger)[5], "TRIGGER:"+concept.trigger)
+    
+    
 # Output format is : index, mm, score, preferred_name, cui, semtype, trigger, location, pos_info, tree_nodes
