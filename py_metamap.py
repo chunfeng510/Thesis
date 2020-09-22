@@ -1,5 +1,5 @@
 from pymetamap import MetaMap
-from mytool import mmiparser as mmip
+from mytool import mmi_parser as mmip
 mm = MetaMap.get_instance('/home/feng/public_mm/bin/metamap20')
 
 sents2 = ['John had a huge heart attack and fever']

@@ -22,7 +22,6 @@ def extract(txt_file, output=True):
     concepts, error = mm.extract_concepts(
         sents, index_list, word_sense_disambiguation=True)
 
-    str = []
     number_for_everyone = 0
     # 每個 concept 都有的數值, 紀錄現在印到了哪個 index
     # 每個 index 只會印一次
