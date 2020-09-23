@@ -4,7 +4,7 @@ mm = MetaMap.get_instance('/home/feng/public_mm/bin/metamap20')
 
 sents2 = ['John had a huge heart attack and fever']
 # sents = ['cold', "John had huge heart attack and fever"]
-txt_file = "clinical_txt/1.txt"
+txt_file = "clinical_txt/2_modified.txt"
 
 # read a file line by line to a List
 def read_line(txt_file):
@@ -22,7 +22,7 @@ index_list = range(1, lines+1)
 # 將剛剛讀出的行內容List, 傳給 mm.extract_concepts 取出概念
 concepts, error = mm.extract_concepts(
     sents, index_list, word_sense_disambiguation=True)
-
+counter = 0
 str = []
 number_for_everyone = 0
 # 每個 concept 都有的數值, 紀錄現在印到了哪個 index
@@ -45,5 +45,6 @@ for concept in concepts:
         
         print("CUI:"+concept.cui, "SMT:"+concept.semtypes, "POS:"+concept.pos_info, 
         "PREFER_N:"+concept.preferred_name, "NEGATED:"+mmip.trigger_parser(concept.trigger)[5], "TRIGGER:"+concept.trigger)
-  
+        counter += 1
+print(counter)
 # Output format is : index, mm, score, preferred_name, cui, semtype, trigger, location, pos_info, tree_nodes
