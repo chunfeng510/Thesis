@@ -1,1 +1,5 @@
 /clinical_txt/*
+*.txt
+*.pl
+
+mytool/__pycache__/
