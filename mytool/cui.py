@@ -14,7 +14,31 @@ def read_line(txt_file):
         lines = i + 1
         return sentences, lines
 
-def extract(txt_file, output=True):
+def extract_sldi(txt_file, output=True):
+    concepts, error = mm.extract_concepts(
+    filename = txt_file, word_sense_disambiguation =True
+)
+    cui_list = list()
+    for concept in concepts:
+        '''
+        Concept : 
+        Index 儲存行的資訊
+        semtype 儲存 semantic type 的資訊
+        '''    
+        
+        if concept.semtypes == "[clnd]" or concept.semtypes == "[dsyn]" :
+            if output:
+                print("Index:"+concept.index)
+            
+            
+            if output:
+                print("CUI:"+concept.cui, "SMT:"+concept.semtypes, "POS:"+concept.pos_info, 
+                "PREFER_N:"+concept.preferred_name, "NEGATED:"+mmip.trigger_parser(concept.trigger)[5], "TRIGGER:"+concept.trigger)
+            cui_list.append(concept.cui)
+    return cui_list
+
+
+def extract_sldiID(txt_file, output=True):
     
     sents, lines = read_line(txt_file)
     index_list = range(1, lines+1)
