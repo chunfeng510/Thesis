@@ -1,3 +1,8 @@
+'''
+將 txt 讀入後 呼叫 metamap 做 mapping 
+回傳 sematic type, CUI, position, negation
+可以使用sldi, sldiID兩種格式檔案
+'''
 from pymetamap import MetaMap
 from . import mmi_parser as mmip
 mm = MetaMap.get_instance('/home/feng/public_mm/bin/metamap20')

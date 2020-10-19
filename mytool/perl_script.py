@@ -1,3 +1,7 @@
+'''
+負責接收傳入的兩個 CUI，後計算相似度
+回傳數值
+'''
 def generator(cui_1, cui_2):
     f = open('run.pl', 'w')
     code1 = '''use UMLS::Interface;

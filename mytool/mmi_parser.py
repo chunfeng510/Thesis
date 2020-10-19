@@ -1,3 +1,8 @@
+'''
+解析 mmi(metamap index) 回傳的內容
+有以下，詳見程式碼區塊
+'''
+
 import re
 
 
