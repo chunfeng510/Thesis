@@ -9,3 +9,5 @@ test.py
 test2.py
 
 test_CUI.py
+
+test*.py
