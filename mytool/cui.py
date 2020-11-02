@@ -87,6 +87,9 @@ def extract_sldiID(txt_file, output=True):
                     "PREFER_N:"+concept.preferred_name, "NEGATED:"+mmip.trigger_parser(concept.trigger)[5], "TRIGGER:"+concept.trigger)
                 cui_list.append(concept.cui)
         elif hasattr(concept, 'ua'):
-            print("This is UDA !")
+            print("----UDA----")
+            print(" index :"+concept.index, "short_form :"+concept.short_form, "long_form :"+concept.long_form,
+            "POS :"+concept.pos_info)
+            print("-----------")
     return cui_list
     # Output format is : index, mm, score, preferred_name, cui, semtype, trigger, location, pos_info, tree_nodes
