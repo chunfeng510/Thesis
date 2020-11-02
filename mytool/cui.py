@@ -93,3 +93,73 @@ def extract_sldiID(txt_file, output=True):
             print("-----------")
     return cui_list
     # Output format is : index, mm, score, preferred_name, cui, semtype, trigger, location, pos_info, tree_nodes
+
+def get_all_cui_list(patient_id, date, output = True):
+    '''
+    回傳 某病人 某幾天病例中的所有 CUI \n
+    patient_id (str) : 指定某病人 \n
+    date (int) : 指定取回CUI 病例天數範圍\n
+    output (bool): 是否印出執行結果 訊息，預設為 是\n
+    '''
+
+    file_out = str(patient_id)+'/'+str(patient_id)+'_all_'+str(date)+'_cui.txt'
+    for cnt in range(1, date+1):
+        txt_file =  str(patient_id)+'/'+str(patient_id)+'-'+str(cnt)+'_o.txt'
+        
+        print("-----Processing file : "+ txt_file+"-----")
+        sents, lines = read_line(txt_file)
+        index_list = range(1, lines+1)
+        # 將剛剛讀出的行內容List, 傳給 mm.extract_concepts 取出概念
+        concepts, error = mm.extract_concepts(
+            sents, index_list, word_sense_disambiguation=True, derivational_variants=True, user_define_acronyms=True, file_format= 'sldiID')
+
+        number_for_everyone = 0
+        # 每個 concept 都有的數值, 紀錄現在印到了哪個 index
+        # 每個 index 只會印一次
+        whether_print = True
+        # 如果印出了 index 就不要印了 設為否
+        cui_list = list()
+        for concept in concepts:
+            '''
+            Concept : 
+            Index 儲存行的資訊
+            semtype 儲存 semantic type 的資訊
+            '''    
+            if hasattr(concept, 'mm'):
+                if number_for_everyone != int(concept.index) :
+                    whether_print = True
+                    number_for_everyone += 1 
+                if (concept.semtypes == "[clnd]" or concept.semtypes == "[dsyn]" or concept.semtypes == "[acab]"
+                    or concept.semtypes == "[anab]" or concept.semtypes == "[fndg]" or concept.semtypes == "[inpo]"
+                    or concept.semtypes == "[mobd]" or concept.semtypes == "[neop]" or concept.semtypes == "[patf]"
+                    or concept.semtypes == "[sosy]" or concept.semtypes == "[aapp]" or concept.semtypes == "[antb]"
+                    or concept.semtypes == "[bacs]" or concept.semtypes == "[chem]" or concept.semtypes == "[enzy]"
+                    or concept.semtypes == "[hops]" or concept.semtypes == "[horm]" or concept.semtypes == "[imft]"
+                    or concept.semtypes == "[inch]" or concept.semtypes == "[lbpr]" or concept.semtypes == "[medd]"
+                    or concept.semtypes == "[nnon]" or concept.semtypes == "[orch]" or concept.semtypes == "[phsu]"
+                    or concept.semtypes == "[topp]" or concept.semtypes == "[vita]") :
+                # if True :
+                    if whether_print:
+                        if output:
+                            print("Index:"+concept.index)
+                        whether_print =False
+                    
+                    if output:
+                        print(concept.cui, "POS:"+concept.pos_info, 
+                        "NEGATED:"+mmip.trigger_parser(concept.trigger)[5])
+                    f = open(file_out, 'a')
+                    f.write(concept.cui+", "+concept.index+", "+concept.pos_info+", "+mmip.trigger_parser(concept.trigger)[5]+'\n')
+                    
+                    cui_list.append(concept.cui)
+                    
+            elif hasattr(concept, 'ua'):
+                print("----UDA----")
+                print(" index :"+concept.index, "short_form :"+concept.short_form, "long_form :"+concept.long_form,
+                "POS :"+concept.pos_info)
+                print("-----------")
+                f = open(file_out, 'a')
+                f.write(concept.long_form+", "+concept.index+", "+concept.pos_info+'\n')
+                
+    f.close()       
+                
+        # return cui_list
