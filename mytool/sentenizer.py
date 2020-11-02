@@ -18,7 +18,7 @@ sen_after = list()
 # sen1 = "cycle 2 on 2017.07.14 to 2017.07.1 cycle 3 on 2017.08.11 to 2017.08.13 ;"
 
 def file_process(patient_id, total_days):
-    for cnt in range(1, total_days):
+    for cnt in range(1, total_days+1):
         file_in = str(patient_id)+'/80001-'+str(cnt)+'.txt'
         file_out = str(patient_id)+'/80001-'+str(cnt)+'_o.txt'
         try:
