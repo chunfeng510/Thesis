@@ -251,4 +251,5 @@ def get_all_cui_list_unique(patient_id, date, output = True):
                 f.close()
                 
     f.close()
-    print("\n"+"Success processed "+ str(date) +" days txt files. !!")        
+    print("\n"+"Success processed "+ str(date) +" days txt files. !!")
+    

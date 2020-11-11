@@ -19,6 +19,8 @@ sen_after = list()
 
 def file_process(patient_id, total_days):
     for cnt in range(1, total_days+1):
+        sen_before = list()
+        sen_after = list()
         file_in = str(patient_id)+'/80001-'+str(cnt)+'.txt'
         file_out = str(patient_id)+'/80001-'+str(cnt)+'_o.txt'
         try:
