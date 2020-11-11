@@ -3,8 +3,8 @@ from mytool import perl_script
 import subprocess
 
 # cui_list = cui.extract("clinical_txt/2_modified.txt" , output=False)
-cui_list_day_1 = cui.extract_sldi("clinical_txt/1_modified.txt", output=False)
-cui_list_day_2 = cui.extract_sldi("clinical_txt/2_modified.txt", output=False)
+cui_list_day_1 = cui.extract_sldiID("clinical_txt/1_o.txt", output=True)
+cui_list_day_2 = cui.extract_sldiID("clinical_txt/2_o.txt", output=True)
 # cui_list_day_3 = cui.extract_sldi("clinical_txt/3_modified.txt", output=False)
 # cui_list_day_4 = cui.extract_sldi("clinical_txt/4_modified.txt", output=False)
 # cui_list_day_5 = cui.extract_sldi("clinical_txt/5_modified.txt", output=False)
