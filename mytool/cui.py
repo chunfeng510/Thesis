@@ -252,4 +252,199 @@ def get_all_cui_list_unique(patient_id, date, output = True):
                 
     f.close()
     print("\n"+"Success processed "+ str(date) +" days txt files. !!")
+
+def is_target_smt(concept_obj):
+    if (concept_obj.semtypes == "[clnd]" or concept_obj.semtypes == "[dsyn]" or concept_obj.semtypes == "[acab]"
+                    or concept_obj.semtypes == "[anab]" or concept_obj.semtypes == "[fndg]" or concept_obj.semtypes == "[inpo]"
+                    or concept_obj.semtypes == "[mobd]" or concept_obj.semtypes == "[neop]" or concept_obj.semtypes == "[patf]"
+                    or concept_obj.semtypes == "[sosy]" or concept_obj.semtypes == "[aapp]" or concept_obj.semtypes == "[antb]"
+                    or concept_obj.semtypes == "[bacs]" or concept_obj.semtypes == "[chem]" or concept_obj.semtypes == "[enzy]"
+                    or concept_obj.semtypes == "[hops]" or concept_obj.semtypes == "[horm]" or concept_obj.semtypes == "[imft]"
+                    or concept_obj.semtypes == "[inch]" or concept_obj.semtypes == "[lbpr]" or concept_obj.semtypes == "[medd]"
+                    or concept_obj.semtypes == "[nnon]" or concept_obj.semtypes == "[orch]" or concept_obj.semtypes == "[phsu]"
+                    or concept_obj.semtypes == "[topp]" or concept_obj.semtypes == "[vita]") :
+        return True
+    else: 
+        return False
+
+
+def cui_compare(patient_id, ndays, startday, method="smt", mode="and"):
+    '''
+    patient_id :輸入要比較的病人ID
+    method :使用的方法 semtaic type or similarity
+    ndays :往前比較幾天
+    startday :從第幾天開始
+    mode :比較的模式 and/or
+
+    '''
+    sm_type={"[clnd]":0, "[dsyn]":0, "[acab]":0,"[anab]":0, "[fndg]":0, "[inpo]":0, "[mobd]":0, "[neop]":0, "[patf]":0, "[sosy]":0, "[aapp]":0, "[antb]":0,
+                "[bacs]":0, "[chem]":0, "[enzy]":0, "[hops]":0, "[horm]":0, "[imft]":0, "[inch]":0, "[lbpr]":0, "[medd]":0, "[nnon]":0, "[orch]":0, "[phsu]":0,
+                "[topp]":0, "[vita]":0,}
+    # how to access use : sm_typpe['[clnd]']
+    smt_appeared_cur = list()
+    smt_appeared_before_ndays = list()
+    smt_appeared_all = list()
+    def is_appeared(smt, appeared_list):
+        
+        if smt == "[clnd]" and sm_type['[clnd]'] == 0 :
+            sm_type['[clnd]'] = 1
+            appeared_list.append("clnd")
+            
+
+        elif smt == "[dsyn]" and sm_type['[dsyn]'] == 0:
+            sm_type['[dsyn]'] = 1
+            appeared_list.append("dsyn")
+
+        elif smt == "[acab]" and sm_type['[acab]'] == 0:
+            sm_type['[acab]'] = 1
+            appeared_list.append("acab")
+
+        elif smt == "[anab]" and sm_type['[anab]'] == 0:
+            sm_type['[anab]'] = 1
+            appeared_list.append("anab")
+
+        elif smt == "[fndg]" and sm_type['[fndg]'] == 0:
+            sm_type['[fndg]'] = 1
+            appeared_list.append("fndg")
+        
+        elif smt == "[inpo]" and sm_type['[inpo]'] == 0:
+            sm_type['[inpo]'] = 1
+            appeared_list.append("inpo")
+        
+        elif smt == "[mobd]" and sm_type['[mobd]'] == 0:
+            sm_type['[mobd]'] = 1
+            appeared_list.append("mobd")
+        elif smt == "[neop]" and sm_type['[neop]'] == 0:
+            sm_type['[neop]'] = 1
+            appeared_list.append("neop")
+        elif smt == "[patf]" and sm_type['[patf]'] == 0:
+            sm_type['[patf]'] = 1
+            appeared_list.append("patf")
+            
+        elif smt == "[sosy]" and sm_type['[sosy]'] == 0:
+            sm_type['[sosy]'] = 1
+            appeared_list.append("sosy")
+            
+        elif smt == "[aapp]" and sm_type['[aapp]'] == 0:
+            sm_type['[aapp]'] = 1
+            appeared_list.append("aapp")
+            
+        elif smt == "[antb]" and sm_type['[antb]'] == 0:
+            sm_type['[antb]'] = 1
+            appeared_list.append("antb")
+
+        elif smt == "[bacs]" and sm_type['[bacs]'] == 0:
+            sm_type['[bacs]'] = 1
+            appeared_list.append("bacs")
+
+        elif smt == "[chem]" and sm_type['[chem]'] == 0:
+            sm_type['[chem]'] = 1
+            appeared_list.append("chem")
+            
+        elif smt == "[enzy]" and sm_type['[enzy]'] == 0:
+            sm_type['[enzy]'] = 1
+            appeared_list.append("enzy")
+
+        elif smt == "[hops]" and sm_type['[hops]'] == 0:
+            sm_type['[hops]'] = 1
+            appeared_list.append("hops")
+
+        elif smt == "[horm]" and sm_type['[horm]'] == 0:
+            sm_type['[horm]'] = 1  
+            appeared_list.append("horm")
+
+        elif smt == "[imft]" and sm_type['[imft]'] == 0:
+            sm_type['[imft]'] = 1  
+            appeared_list.append("imft")
+
+        elif smt == "[inch]" and sm_type['[inch]'] == 0:
+            sm_type['[inch]'] = 1  
+            appeared_list.append("inch")
+
+        elif smt == "[lbpr]" and sm_type['[lbpr]'] == 0:
+            sm_type['[lbpr]'] = 1  
+            appeared_list.append("lbpr")
+
+        elif smt == "[medd]" and sm_type['[medd]'] == 0:
+            sm_type['[medd]'] = 1  
+            appeared_list.append("medd")
+
+        elif smt == "[nnon]" and sm_type['[nnon]'] == 0:
+            sm_type['[nnon]'] = 1   
+            appeared_list.append("nnon") 
+        
+        elif smt == "[orch]" and sm_type['[orch]'] == 0:
+            sm_type['[orch]'] = 1
+            appeared_list.append("orch")
+
+        elif smt == "[phsu]" and sm_type['[phsu]'] == 0:
+            sm_type['[phsu]'] = 1  
+            appeared_list.append("phsu")
+
+        elif smt == "[topp]" and sm_type['[topp]'] == 0:
+            sm_type['[topp]'] = 1  
+            appeared_list.append("topp")
+
+        elif smt == "[vita]" and sm_type['[vita]'] == 0:
+            sm_type['[vita]'] = 1   
+            appeared_list.append("vita") 
+        
+    # ----------------------------------------------------------
+    date = ndays+1
+    # cnt = today, ndays = n天前
+    for cnt in range(date, 0,-1):
+        print("***** 這是第", cnt, "天*****")
+        txt_file =  str(patient_id)+'/'+str(patient_id)+'-'+str(cnt)+'_o.txt'
+        sents, lines = read_line(txt_file)
+        index_list = range(1, lines+1)
+        # 將剛剛讀出的行內容List, 傳給 mm.extract_concepts 取出概念
+        concepts, error = mm.extract_concepts(
+            sents, index_list, word_sense_disambiguation=True, derivational_variants=True, user_define_acronyms=True, file_format= 'sldiID')
+
+        number_for_everyone = 0
+        # 每個 concept 都有的數值, 紀錄現在印到了哪個 index
+        # 每個 index 只會印一次
+        whether_print = True
+        # 如果印出了 index 就不要印了 設為否
+        cui_list = list()
+        for concept in concepts:
+            '''
+            Concept : 
+            Index 儲存行的資訊
+            semtype 儲存 semantic type 的資訊
+            '''    
+            if hasattr(concept, 'mm'):
+                if number_for_everyone != int(concept.index) :
+                    whether_print = True
+                    number_for_everyone += 1 
+                if is_target_smt(concept):
+                    # 如果是目標內的smt 才做以下事情
+                # if True :
+                
+                    print("Index:"+concept.index)
+                    if cnt == date:
+                        is_appeared(concept.semtypes, smt_appeared_cur)
+                        # smt_appeared_all = smt_appeared_cur
+                    else:
+                        is_appeared(concept.semtypes, smt_appeared_before_ndays)
+                    print("CUI:"+concept.cui, "SMT:"+concept.semtypes, "POS:"+concept.pos_info, 
+                    "NEGATED:"+mmip.trigger_parser(concept.trigger)[5], "TRIGGER:"+concept.trigger)
+                    cui_list.append(concept.cui)
+            elif hasattr(concept, 'ua'):
+                print("----UDA----")
+                print(" index :"+concept.index, "short_form :"+concept.short_form, "long_form :"+concept.long_form,
+                "POS :"+concept.pos_info)
+                print("-----------")
+        if cnt == date:
+            # print("第",cnt,"天的semantic type：",smt_appeared_cur)
+            sm_type = dict.fromkeys(sm_type, 0)
+            print("dict rest.")
+    
+    smt_appeared_all = list(set(smt_appeared_cur) | set(smt_appeared_before_ndays))
+    print("比較：第", date, "天 往前追朔", ndays, "天的Semantic type")
+    print("全部出現的 semantic type：", smt_appeared_all)
+    print("第",date,"天的semantic type：",smt_appeared_cur)
+    print(ndays,"天之間出現的 semantic type：", smt_appeared_before_ndays)
+    print("第", date,"天 跟前", ndays, "天相比，沒出現過的 SMT (新資訊) : ", list(set(smt_appeared_cur)-set(smt_appeared_before_ndays)))
+    print("第", date,"天 跟前", ndays, "天相比，已出現過的 SMT (舊資訊) : ", list(set(smt_appeared_cur)-(set(smt_appeared_cur)-set(smt_appeared_before_ndays))))
     
