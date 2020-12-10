@@ -10,9 +10,9 @@ def parser(output_msg):
     str = output_msg.split(',',)
 
 
-def trigger_parser(input):
-    input = input.replace('[', '').replace(']', '')
-    info = list(input.split('-'))
+def trigger_parser(input_phrase):
+    input_phrase = input_phrase.replace('[', '').replace(']', '').replace(',', '-')
+    info = list(input_phrase.split('-'))
     '''
     info[0] = UMLS concept
     info[1] = loc
@@ -21,4 +21,8 @@ def trigger_parser(input):
     info[4] = Part os Speech
     info[5] = Negation flag
     '''
-    return info
+    for n in range(5, 11):
+        if info[n] == '1' or info[n] == '0':
+            return(info[n])
+            break
+ 
