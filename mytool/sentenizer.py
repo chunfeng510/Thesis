@@ -21,8 +21,8 @@ def file_process(patient_id, total_days):
     for cnt in range(1, total_days+1):
         sen_before = list()
         sen_after = list()
-        file_in = str(patient_id)+'/80001-'+str(cnt)+'.txt'
-        file_out = str(patient_id)+'/80001-'+str(cnt)+'_o.txt'
+        file_in = 'Clinical Note/'+str(patient_id)+'/'+str(cnt)+'.txt'
+        file_out = 'Clinical Note/'+str(patient_id)+'/output/'+str(cnt)+'_o.txt'
         try:
             f = open(file_in)
         except FileNotFoundError:
@@ -45,8 +45,10 @@ def file_process(patient_id, total_days):
         
         sen_after = [re.sub(r'(\d{4}).(\d{2})', r'\1/\2', line) for line in sen_after]
 
-        sen_after = [re.sub(r'★|■|#|@|\*|-|>', '', line) for line in sen_after]
+        sen_after = [re.sub(r'★|■|#|@|\*|-|>|<', '', line) for line in sen_after]
         
+        sen_after = [re.sub(r'\\|\[|\]|\+|\$|%|\(|\)|\^|\!|＼|／|○|↓|\||▽|:|—|！|，|。|？|、|~|￥|…|（|）|＜|＞|&|╴|│', ' ', line) for line in sen_after]
+
         while '\n' in sen_after:
             sen_after.remove('\n')
         while ' \n' in sen_after:
@@ -88,7 +90,10 @@ def single_txt_process(file_in, file_out):
     
     sen_after = [re.sub(r'(\d{4}).(\d{2})', r'\1/\2', line) for line in sen_after]
 
-    sen_after = [re.sub(r'★|■|#|@|\*|-|>', '', line) for line in sen_after]
+    sen_after = [re.sub(r'★|■|#|@|\*|-|>|<', '', line) for line in sen_after]
+
+    sen_after = [re.sub(r'\\|\[|\]|\+|\$|%|\(|\)|\^|\!|＼|／|○|↓|\||▽|:|—|！|，|。|？|、|~|￥|…|（|）|＜|＞|&|╴|│', '', line) for line in sen_after]
+    # sen_after = [re.sub('[-\s+\.\!\/_,$%^*()+\"\']+|[+——！○↓，■★。？、~@#￥%……&*（）:＞╴／▽＼╴＜│]+', ' ', line) for line in sen_after]
     
     while '\n' in sen_after:
         sen_after.remove('\n')
