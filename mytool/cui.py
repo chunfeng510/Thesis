@@ -6,7 +6,7 @@
 from pymetamap import MetaMap
 from . import mmi_parser as mmip
 mm = MetaMap.get_instance('/home/feng/public_mm/bin/metamap20')
-
+import csv
 # txt_file = "clinical_txt/1.txt"
 
 # read a file line by line to a List
@@ -43,25 +43,21 @@ def extract_sldi(txt_file, output=True):
             
             if output:
                 print("CUI:"+concept.cui, "SMT:"+concept.semtypes, "POS:"+concept.pos_info, 
-                "PREFER_N:"+concept.preferred_name, "NEGATED:"+mmip.trigger_parser(concept.trigger)[5], "TRIGGER:"+concept.trigger)
+                "PREFER_N:"+concept.preferred_name, "NEGATED:"+mmip.trigger_parser(concept.trigger), "TRIGGER:"+concept.trigger)
             cui_list.append(concept.cui)
     return cui_list
-
-
-def extract_sldiID(txt_file, output=True):
-    '''
-    負責解析(mapping) txt 檔案中的 term 到 CUI
-    輸入檔案為 sldiID 模式
-    txt_file : 欲 mapping 出 CUI 及其他資訊的 txt檔案
-    output : 決定是否要輸出訊息，或是直接產生結果
-    此 function 會回傳 List 包含所有CUI 資訊
-    '''
-    sents, lines = read_line(txt_file)
+def handle_index(original_index):
+    original_index.split()
+def debug_extract_cui(patient_id, target_date):
+    input_txt_path = 'Clinical_Note/'+str(patient_id)+'/output/'+str(target_date)+'_o.txt'
+    print("-----Processing file : "+ input_txt_path+"-----")
+    sents, lines = read_line(input_txt_path)
     index_list = range(1, lines+1)
     # 將剛剛讀出的行內容List, 傳給 mm.extract_concepts 取出概念
+    # concepts, error = mm.extract_concepts(
+    #     sents, index_list, word_sense_disambiguation=True, user_define_acronyms=False, file_format= 'sldiID', )
     concepts, error = mm.extract_concepts(
-        sents, index_list, word_sense_disambiguation=True, derivational_variants=True, user_define_acronyms=True, file_format= 'sldiID')
-
+        filename= input_txt_path, word_sense_disambiguation=True, user_define_acronyms=False, file_format= 'sldiID', )
     number_for_everyone = 0
     # 每個 concept 都有的數值, 紀錄現在印到了哪個 index
     # 每個 index 只會印一次
@@ -75,34 +71,92 @@ def extract_sldiID(txt_file, output=True):
         semtype 儲存 semantic type 的資訊
         '''    
         if hasattr(concept, 'mm'):
-            if number_for_everyone != int(concept.index) :
+            if number_for_everyone != int(concept.index[3:6]):
                 whether_print = True
                 number_for_everyone += 1 
-            if (concept.semtypes == "[clnd]" or concept.semtypes == "[dsyn]" or concept.semtypes == "[acab]"
-                or concept.semtypes == "[anab]" or concept.semtypes == "[fndg]" or concept.semtypes == "[inpo]"
-                or concept.semtypes == "[mobd]" or concept.semtypes == "[neop]" or concept.semtypes == "[patf]"
-                or concept.semtypes == "[sosy]" or concept.semtypes == "[aapp]" or concept.semtypes == "[antb]"
-                or concept.semtypes == "[bacs]" or concept.semtypes == "[chem]" or concept.semtypes == "[enzy]"
-                or concept.semtypes == "[hops]" or concept.semtypes == "[horm]" or concept.semtypes == "[imft]"
-                or concept.semtypes == "[inch]" or concept.semtypes == "[lbpr]" or concept.semtypes == "[medd]"
-                or concept.semtypes == "[nnon]" or concept.semtypes == "[orch]" or concept.semtypes == "[phsu]"
-                or concept.semtypes == "[topp]" or concept.semtypes == "[vita]") :
+            if True: #is_target_smt(concept) :
             # if True :
                 if whether_print:
-                    if output:
-                        print("Index:"+concept.index)
+                    if True:
+                        print("Index:"+str(int(concept.index[3:6])))
                     whether_print =False
                 
-                if output:
+                if True:
                     print("CUI:"+concept.cui, "SMT:"+concept.semtypes, "POS:"+concept.pos_info, 
-                    "PREFER_N:"+concept.preferred_name, "NEGATED:"+mmip.trigger_parser(concept.trigger)[5], "TRIGGER:"+concept.trigger)
+                    "PREFER_N:"+concept.preferred_name, "NEGATED:"+mmip.trigger_parser(concept.trigger), "TRIGGER:"+concept.trigger)
                 cui_list.append(concept.cui)
+
         elif hasattr(concept, 'ua'):
             print("----UDA----")
             print(" index :"+concept.index, "short_form :"+concept.short_form, "long_form :"+concept.long_form,
             "POS :"+concept.pos_info)
             print("-----------")
+    
     return cui_list
+
+
+def extract_sldiID(patient_id, number_of_note, output=True):
+    '''
+    update !!
+    負責解析(mapping) txt 檔案中的每一個句子中的每一個term 到 一個 concept
+    輸入檔案為 sldiID 模式
+    會將所有資訊輸出成csv 到 output 資料夾中
+    patient_id : 欲做 mapping 的病人ID
+    number_of_note : 這個病人有幾個病例
+    此 function 會回傳mapping 到的concpet 所有資訊
+    （ 如：cui, position, negation, smt_type...)
+    '''
+    for cnt in range(1, number_of_note+1):
+        txt_file = 'Clinical_Note/'+str(patient_id)+'/output/'+str(cnt)+'_o.txt'
+        # 80001/80001-1_o.txt
+        output_file_path = 'Clinical_Note/'+str(patient_id)+'/csv/'+str(cnt)+'.csv'
+        csvfile = open(output_file_path, 'w', newline='')
+        writer = csv.writer(csvfile)
+        writer.writerow(['CUI', 'ROW', 'POSITION', 'NEGATION', 'SMT', 'TRIGGER'])
+        print("-----Processing file : "+ txt_file+"-----")
+        # sents, lines = read_line(txt_file)
+        # index_list = range(1, lines+1)
+        # 將剛剛讀出的行內容List, 傳給 mm.extract_concepts 取出概念
+        concepts, error = mm.extract_concepts(
+            filename=txt_file, word_sense_disambiguation=True, no_derivational_variants=True ,derivational_variants=False, user_define_acronyms=True, file_format= 'sldiID',  )
+        number_for_everyone = 0
+        # 每個 concept 都有的數值, 紀錄現在印到了哪個 index
+        # 每個 index 只會印一次
+        whether_print = True
+        # 如果印出了 index 就不要印了 設為否
+        cui_list = list()
+        
+        for concept in concepts:
+            '''
+            Concept : 
+            Index 儲存行的資訊
+            semtype 儲存 semantic type 的資訊
+            '''    
+            if hasattr(concept, 'mm'):
+                if number_for_everyone != int(concept.index[3:6]) :
+                    whether_print = True
+                    number_for_everyone += 1 
+                if is_target_smt(concept) :
+                # if True :
+                    if whether_print:
+                        if output:
+                            print("Index:"+str(int(concept.index[3:6])))
+                        whether_print =False
+                    
+                    if output:
+                        print("CUI:"+concept.cui, "SMT:"+concept.semtypes, "POS:"+concept.pos_info, 
+                        "PREFER_N:"+concept.preferred_name, "NEGATED:"+mmip.trigger_parser(concept.trigger), "TRIGGER:"+concept.trigger)
+                        writer.writerow([concept.cui, int(concept.index[3:6]), concept.pos_info, mmip.trigger_parser(concept.trigger), concept.semtypes, concept.trigger])
+                    cui_list.append(concept.cui)
+
+            elif hasattr(concept, 'ua'):
+                print("----UDA----")
+                print(" Index :"+concept.index, "short_form :"+concept.short_form, "long_form :"+concept.long_form,
+                "POS :"+concept.pos_info)
+                print("-----------")
+        csvfile.close()
+    return cui_list
+    
     # Output format is : index, mm, score, preferred_name, cui, semtype, trigger, location, pos_info, tree_nodes
 
 def get_all_cui_list(patient_id, date, output = True):
@@ -284,111 +338,7 @@ def cui_compare(patient_id, ndays, startday, method="smt", mode="and"):
     smt_appeared_cur = list()
     smt_appeared_before_ndays = list()
     smt_appeared_all = list()
-    def is_appeared(smt, appeared_list):
-        
-        if smt == "[clnd]" and sm_type['[clnd]'] == 0 :
-            sm_type['[clnd]'] = 1
-            appeared_list.append("clnd")
-            
-
-        elif smt == "[dsyn]" and sm_type['[dsyn]'] == 0:
-            sm_type['[dsyn]'] = 1
-            appeared_list.append("dsyn")
-
-        elif smt == "[acab]" and sm_type['[acab]'] == 0:
-            sm_type['[acab]'] = 1
-            appeared_list.append("acab")
-
-        elif smt == "[anab]" and sm_type['[anab]'] == 0:
-            sm_type['[anab]'] = 1
-            appeared_list.append("anab")
-
-        elif smt == "[fndg]" and sm_type['[fndg]'] == 0:
-            sm_type['[fndg]'] = 1
-            appeared_list.append("fndg")
-        
-        elif smt == "[inpo]" and sm_type['[inpo]'] == 0:
-            sm_type['[inpo]'] = 1
-            appeared_list.append("inpo")
-        
-        elif smt == "[mobd]" and sm_type['[mobd]'] == 0:
-            sm_type['[mobd]'] = 1
-            appeared_list.append("mobd")
-        elif smt == "[neop]" and sm_type['[neop]'] == 0:
-            sm_type['[neop]'] = 1
-            appeared_list.append("neop")
-        elif smt == "[patf]" and sm_type['[patf]'] == 0:
-            sm_type['[patf]'] = 1
-            appeared_list.append("patf")
-            
-        elif smt == "[sosy]" and sm_type['[sosy]'] == 0:
-            sm_type['[sosy]'] = 1
-            appeared_list.append("sosy")
-            
-        elif smt == "[aapp]" and sm_type['[aapp]'] == 0:
-            sm_type['[aapp]'] = 1
-            appeared_list.append("aapp")
-            
-        elif smt == "[antb]" and sm_type['[antb]'] == 0:
-            sm_type['[antb]'] = 1
-            appeared_list.append("antb")
-
-        elif smt == "[bacs]" and sm_type['[bacs]'] == 0:
-            sm_type['[bacs]'] = 1
-            appeared_list.append("bacs")
-
-        elif smt == "[chem]" and sm_type['[chem]'] == 0:
-            sm_type['[chem]'] = 1
-            appeared_list.append("chem")
-            
-        elif smt == "[enzy]" and sm_type['[enzy]'] == 0:
-            sm_type['[enzy]'] = 1
-            appeared_list.append("enzy")
-
-        elif smt == "[hops]" and sm_type['[hops]'] == 0:
-            sm_type['[hops]'] = 1
-            appeared_list.append("hops")
-
-        elif smt == "[horm]" and sm_type['[horm]'] == 0:
-            sm_type['[horm]'] = 1  
-            appeared_list.append("horm")
-
-        elif smt == "[imft]" and sm_type['[imft]'] == 0:
-            sm_type['[imft]'] = 1  
-            appeared_list.append("imft")
-
-        elif smt == "[inch]" and sm_type['[inch]'] == 0:
-            sm_type['[inch]'] = 1  
-            appeared_list.append("inch")
-
-        elif smt == "[lbpr]" and sm_type['[lbpr]'] == 0:
-            sm_type['[lbpr]'] = 1  
-            appeared_list.append("lbpr")
-
-        elif smt == "[medd]" and sm_type['[medd]'] == 0:
-            sm_type['[medd]'] = 1  
-            appeared_list.append("medd")
-
-        elif smt == "[nnon]" and sm_type['[nnon]'] == 0:
-            sm_type['[nnon]'] = 1   
-            appeared_list.append("nnon") 
-        
-        elif smt == "[orch]" and sm_type['[orch]'] == 0:
-            sm_type['[orch]'] = 1
-            appeared_list.append("orch")
-
-        elif smt == "[phsu]" and sm_type['[phsu]'] == 0:
-            sm_type['[phsu]'] = 1  
-            appeared_list.append("phsu")
-
-        elif smt == "[topp]" and sm_type['[topp]'] == 0:
-            sm_type['[topp]'] = 1  
-            appeared_list.append("topp")
-
-        elif smt == "[vita]" and sm_type['[vita]'] == 0:
-            sm_type['[vita]'] = 1   
-            appeared_list.append("vita") 
-        
+    
     # ----------------------------------------------------------
     date = ndays+1
     # cnt = today, ndays = n天前
@@ -423,10 +373,11 @@ def cui_compare(patient_id, ndays, startday, method="smt", mode="and"):
                 
                     print("Index:"+concept.index)
                     if cnt == date:
-                        is_appeared(concept.semtypes, smt_appeared_cur)
+                        pass
                         # smt_appeared_all = smt_appeared_cur
                     else:
-                        is_appeared(concept.semtypes, smt_appeared_before_ndays)
+                        pass
+                        # is_appeared(concept.semtypes, smt_appeared_before_ndays)
                     print("CUI:"+concept.cui, "SMT:"+concept.semtypes, "POS:"+concept.pos_info, 
                     "NEGATED:"+mmip.trigger_parser(concept.trigger)[5], "TRIGGER:"+concept.trigger)
                     cui_list.append(concept.cui)
