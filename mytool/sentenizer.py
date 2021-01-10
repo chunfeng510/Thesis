@@ -5,7 +5,7 @@
 2. 日期標示法替換
 3. 拼字檢查
 4. 加入前置 ID
-
+將結果輸出到 病人底下的 output 資料夾中
 '''
 
 import re
@@ -21,8 +21,8 @@ def file_process(patient_id, total_days):
     for cnt in range(1, total_days+1):
         sen_before = list()
         sen_after = list()
-        file_in = 'Clinical Note/'+str(patient_id)+'/'+str(cnt)+'.txt'
-        file_out = 'Clinical Note/'+str(patient_id)+'/output/'+str(cnt)+'_o.txt'
+        file_in = 'Clinical_Note/'+str(patient_id)+'/'+str(cnt)+'.txt'
+        file_out = 'Clinical_Note/'+str(patient_id)+'/output/'+str(cnt)+'_o.txt'
         try:
             f = open(file_in)
         except FileNotFoundError:
@@ -45,7 +45,7 @@ def file_process(patient_id, total_days):
         
         sen_after = [re.sub(r'(\d{4}).(\d{2})', r'\1/\2', line) for line in sen_after]
 
-        sen_after = [re.sub(r'★|■|#|@|\*|-|>|<', '', line) for line in sen_after]
+        sen_after = [re.sub(r'★|■|#|@|\*|-|>|<', ' ', line) for line in sen_after]
         
         sen_after = [re.sub(r'\\|\[|\]|\+|\$|%|\(|\)|\^|\!|＼|／|○|↓|\||▽|:|—|！|，|。|？|、|~|￥|…|（|）|＜|＞|&|╴|│', ' ', line) for line in sen_after]
 

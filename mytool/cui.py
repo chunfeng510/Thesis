@@ -155,6 +155,7 @@ def extract_sldiID(patient_id, number_of_note, output=True):
                 "POS :"+concept.pos_info)
                 print("-----------")
         csvfile.close()
+    print("---Process complete !---")
     return cui_list
     
     # Output format is : index, mm, score, preferred_name, cui, semtype, trigger, location, pos_info, tree_nodes
@@ -231,16 +232,16 @@ def get_all_cui_list(patient_id, date, output = True):
 def get_all_cui_list_unique(patient_id, date, output = True):
     '''
     回傳 某病人 某幾天病例中的所有 CUI（只有CUI） \n
-    且 去除重複的 CUI 
+    且 去除重複的 CUI，輸出成CSV
     patient_id (str) : 指定某病人 \n
     date (int) : 指定取回CUI 病例天數範圍\n
     output (bool): 是否印出執行結果 訊息，預設為 是\n
     '''
     seen = set()
-    file_out = str(patient_id)+'/'+str(patient_id)+'_all_'+str(date)+'_cui_unique.txt'
+    file_out = 'Clinical_Note/'+str(patient_id)+'/'+str(patient_id)+'_all_'+str(date)+'_cui_unique.txt'
     f = open(file_out, 'w')
     for cnt in range(1, date+1):
-        txt_file =  str(patient_id)+'/'+str(patient_id)+'-'+str(cnt)+'_o.txt'
+        txt_file =  'Clinical_Note/'+str(patient_id)+'/output/'+str(cnt)+'_o.txt'
         
         print("-----Processing file : "+ txt_file+"-----")
         sents, lines = read_line(txt_file)
@@ -264,15 +265,7 @@ def get_all_cui_list_unique(patient_id, date, output = True):
                 if number_for_everyone != int(concept.index) :
                     whether_print = True
                     number_for_everyone += 1 
-                if (concept.semtypes == "[clnd]" or concept.semtypes == "[dsyn]" or concept.semtypes == "[acab]"
-                    or concept.semtypes == "[anab]" or concept.semtypes == "[fndg]" or concept.semtypes == "[inpo]"
-                    or concept.semtypes == "[mobd]" or concept.semtypes == "[neop]" or concept.semtypes == "[patf]"
-                    or concept.semtypes == "[sosy]" or concept.semtypes == "[aapp]" or concept.semtypes == "[antb]"
-                    or concept.semtypes == "[bacs]" or concept.semtypes == "[chem]" or concept.semtypes == "[enzy]"
-                    or concept.semtypes == "[hops]" or concept.semtypes == "[horm]" or concept.semtypes == "[imft]"
-                    or concept.semtypes == "[inch]" or concept.semtypes == "[lbpr]" or concept.semtypes == "[medd]"
-                    or concept.semtypes == "[nnon]" or concept.semtypes == "[orch]" or concept.semtypes == "[phsu]"
-                    or concept.semtypes == "[topp]" or concept.semtypes == "[vita]") :
+                if is_target_smt(concept): 
                 # if True :
                     if whether_print:
                         if output:
@@ -290,6 +283,8 @@ def get_all_cui_list_unique(patient_id, date, output = True):
                     else:
                         f.write(concept.cui+'\n')
                         seen.add(concept.cui)
+                    f.close()
+
                        
                     
                             
@@ -300,11 +295,13 @@ def get_all_cui_list_unique(patient_id, date, output = True):
                 # print(" index :"+concept.index, "short_form :"+concept.short_form, "long_form :"+concept.long_form,
                 # "POS :"+concept.pos_info)
                 # print("-----------")
-                f = open(file_out, 'a')
-                f.write(concept.long_form+'\n') #寫入縮寫詞到檔案
-                f.close()
+                # 下：更新20210104，mapping出的縮寫詞不需要寫入
+                # f = open(file_out, 'a')
+                # f.write(concept.long_form+'\n') #寫入縮寫詞到檔案
+                # f.close()
+                pass
                 
-    f.close()
+    
     print("\n"+"Success processed "+ str(date) +" days txt files. !!")
 
 def is_target_smt(concept_obj):
