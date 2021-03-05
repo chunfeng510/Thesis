@@ -36,7 +36,7 @@ def extract_sldi(txt_file, output=True):
         semtype 儲存 semantic type 的資訊
         '''    
         
-        if concept.semtypes == "[clnd]" or concept.semtypes == "[dsyn]" :
+        if True:#concept.semtypes == "[clnd]" or concept.semtypes == "[dsyn]" :
             if output:
                 print("Index:"+concept.index)
             
@@ -112,13 +112,13 @@ def extract_sldiID(patient_id, number_of_note, output=True):
         output_file_path = 'Clinical_Note/'+str(patient_id)+'/csv/'+str(cnt)+'.csv'
         csvfile = open(output_file_path, 'w', newline='')
         writer = csv.writer(csvfile)
-        writer.writerow(['CUI', 'ROW', 'POSITION', 'NEGATION', 'SMT', 'TRIGGER'])
+        writer.writerow(['CUI', 'ROW', 'POSITION', 'NEGATION', 'TEXT_TRIGGER','SMT', 'TRIGGER'])
         print("-----Processing file : "+ txt_file+"-----")
         # sents, lines = read_line(txt_file)
         # index_list = range(1, lines+1)
         # 將剛剛讀出的行內容List, 傳給 mm.extract_concepts 取出概念
         concepts, error = mm.extract_concepts(
-            filename=txt_file, word_sense_disambiguation=True, no_derivational_variants=True ,derivational_variants=False, user_define_acronyms=True, file_format= 'sldiID',  )
+            filename=txt_file, word_sense_disambiguation=True, user_define_acronyms=True, file_format= 'sldiID',  )
         number_for_everyone = 0
         # 每個 concept 都有的數值, 紀錄現在印到了哪個 index
         # 每個 index 只會印一次
@@ -145,8 +145,8 @@ def extract_sldiID(patient_id, number_of_note, output=True):
                     
                     if output:
                         print("CUI:"+concept.cui, "SMT:"+concept.semtypes, "POS:"+concept.pos_info, 
-                        "PREFER_N:"+concept.preferred_name, "NEGATED:"+mmip.trigger_parser(concept.trigger), "TRIGGER:"+concept.trigger)
-                        writer.writerow([concept.cui, int(concept.index[3:6]), concept.pos_info, mmip.trigger_parser(concept.trigger), concept.semtypes, concept.trigger])
+                        "PREFER_N:"+concept.preferred_name, "NEGATED:"+mmip.trigger_parser(concept.trigger), "TEXT_TRIGGER:"+mmip.trigger_parser_getinfo(concept.trigger, 3),"TRIGGER:"+concept.trigger)
+                        writer.writerow([concept.cui, int(concept.index[3:6]), concept.pos_info, mmip.trigger_parser(concept.trigger), mmip.trigger_parser_getinfo(concept.trigger, 3),concept.semtypes, concept.trigger])
                     cui_list.append(concept.cui)
 
             elif hasattr(concept, 'ua'):
@@ -238,8 +238,11 @@ def get_all_cui_list_unique(patient_id, date, output = True):
     output (bool): 是否印出執行結果 訊息，預設為 是\n
     '''
     seen = set()
-    file_out = 'Clinical_Note/'+str(patient_id)+'/'+str(patient_id)+'_all_'+str(date)+'_cui_unique.txt'
-    f = open(file_out, 'w')
+    file_out = 'Clinical_Note/'+str(patient_id)+'/'+str(patient_id)+'_all_'+str(date)+'_cui_unique.csv'
+    # f = open(file_out, 'w')
+    csvfile = open(file_out, 'w', newline='')
+    writer = csv.writer(csvfile)
+    writer.writerow(['CUI', 'SMT'])
     for cnt in range(1, date+1):
         txt_file =  'Clinical_Note/'+str(patient_id)+'/output/'+str(cnt)+'_o.txt'
         
@@ -248,13 +251,16 @@ def get_all_cui_list_unique(patient_id, date, output = True):
         index_list = range(1, lines+1)
         # 將剛剛讀出的行內容List, 傳給 mm.extract_concepts 取出概念
         concepts, error = mm.extract_concepts(
-            sents, index_list, word_sense_disambiguation=True, derivational_variants=True, user_define_acronyms=True, file_format= 'sldiID')
+            sents, index_list, word_sense_disambiguation=True, user_define_acronyms=True, file_format= 'sldiID')
 
         number_for_everyone = 0
         # 每個 concept 都有的數值, 紀錄現在印到了哪個 index
         # 每個 index 只會印一次
         whether_print = True
         # 如果印出了 index 就不要印了 設為否
+        
+        
+
         for concept in concepts:
             '''
             Concept : 
@@ -277,13 +283,13 @@ def get_all_cui_list_unique(patient_id, date, output = True):
                         # print(concept.cui, "POS:"+concept.pos_info, 
                         # "NEGATED:"+mmip.trigger_parser(concept.trigger)[5])
                         pass
-                    f = open(file_out, 'a')
+                    # f = open(file_out, 'a')
                     if concept.cui in seen:
                         pass
                     else:
-                        f.write(concept.cui+'\n')
+                        writer.writerow([concept.cui, concept.semtypes.replace('[', '').replace(']', '')])
                         seen.add(concept.cui)
-                    f.close()
+                    # f.close()
 
                        
                     
@@ -395,4 +401,19 @@ def cui_compare(patient_id, ndays, startday, method="smt", mode="and"):
     print(ndays,"天之間出現的 semantic type：", smt_appeared_before_ndays)
     print("第", date,"天 跟前", ndays, "天相比，沒出現過的 SMT (新資訊) : ", list(set(smt_appeared_cur)-set(smt_appeared_before_ndays)))
     print("第", date,"天 跟前", ndays, "天相比，已出現過的 SMT (舊資訊) : ", list(set(smt_appeared_cur)-(set(smt_appeared_cur)-set(smt_appeared_before_ndays))))
-    
+
+
+def smt_grouping(cui_all_unique_path, patient_id):
+    smt_category = ["clnd", "dsyn", "acab", "anab", "fndg", "inpo", "mobd", "neop"
+                    , "patf", "sosy", "aapp", "antb", "bacs", "chem", "enzy", "hops"
+                    , "horm", "imft", "inch", "lbpr", "medd", "nnon", "orch", "phsu"
+                    ,"topp", "vita"]
+
+    csv_all_cui_unique =  open(cui_all_unique_path, newline='')
+    rows = csv.DictReader(csv_all_cui_unique)
+    for row in rows:
+        for smt in smt_category:
+            if row['SMT'] == smt:
+                f = open("Clinical_Note/"+str(patient_id)+'/smt_grouping/'+smt+'.txt', 'a')
+                f.write(row['CUI']+'\n')
+    # print(row['CUI'], 'and',row['SMT'])
