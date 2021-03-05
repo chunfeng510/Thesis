@@ -1,4 +1,5 @@
 import csv
+from . import mmi_parser
 def concept_id(patientID, start_date, number_of_day=1, mode='or'):
     """用以比較病例，從未出現過的CUI，才會被標注
 
@@ -59,11 +60,14 @@ def concept_id(patientID, start_date, number_of_day=1, mode='or'):
         print("----原本", str(org_cnt), "個CUI，現在剩下", now_cnt, "個CUI----")
         n = 0
         for r in rows_cur:
-            print(r['CUI'], r['ROW'], r['POSITION'], r['NEGATION'])
+            
+            print(r['CUI'], r['ROW'], r['POSITION'], r['NEGATION'],)
             anno_list.append([])
             anno_list[n].append(str(r['ROW']))
             anno_list[n].append(str(r['POSITION']))
+            anno_list[n].append(str(r['TEXT_TRIGGER']))
             n+=1
+        print(anno_list)
         return anno_list
     else:
         print("錯誤！\n開始日跟追朔日期一樣，不行！")
