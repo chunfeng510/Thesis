@@ -30,3 +30,9 @@ for_combine.py
 __pycache__/
 
 Gold_Standard/
+
+*.ipynb
+
+*.bdocjs
+
+*.csv
