@@ -20,3 +20,13 @@ Clinical Note/
 Clinical_Note/
 
 text_txt_position.py
+
+for_combine.py
+
+.ipynb_checkpoints/
+
+.vscode/
+
+__pycache__/
+
+Gold_Standard/
