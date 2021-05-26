@@ -20,7 +20,7 @@ def concept_id(patientID, start_date, number_of_day=1, mode='all', whether_print
     pre_date = start_date-1
     # 是否過濾特定SMT
     if mode == 'all':
-        input_path = 'Clinical_Note/'+str(patientID)+'/csv_all/'+str(start_date)+'.csv'
+        input_path = 'Clinical_Note/'+str(patientID)+'/csv_all_exp2_1/'+str(start_date)+'.csv'
     else:
         input_path = 'Clinical_Note/'+str(patientID)+'/csv/'+str(start_date)+'.csv'
     # 讀取第n天 csv檔案 因為有該天CUI資訊
@@ -52,15 +52,16 @@ def concept_id(patientID, start_date, number_of_day=1, mode='all', whether_print
             if whether_print:
                 print("Now processing...", "第", n, "天")
             
-            csv_file_pre = open(to_pre_path(n), newline='')
+            csv_file_pre = open(to_pre_path(n-1), newline='')
             # 打開昨天csv檔
             rows_pre = list(csv.DictReader(csv_file_pre))
+            
             for row_cur in rows_cur: 
                 for row_pre in rows_pre:
                     if row_cur['CUI'] == row_pre['CUI']:
                         if whether_print:
                             print(row_cur['CUI'])
-                        # 輸出一樣的CUI
+                        # 輸出已出現過的CUI，之前已出現過，去除掉
                         rows_cur.remove(row_cur)
                         break
                     
@@ -87,6 +88,7 @@ def concept_id(patientID, start_date, number_of_day=1, mode='all', whether_print
         
         if whether_print:
             print(anno_list)
+        print("compare complete!"+ str(patientID), str(start_date), str(number_of_day))
         return anno_list
     else:
         print("錯誤！\n開始日跟追朔日期一樣，不行！")
@@ -150,11 +152,10 @@ def concept_similarity(patientID, start_date, number_of_day=1, threshold = 0.5, 
             rows_pre = list(csv.DictReader(csv_file_pre))
             for row_cur in rows_cur: 
                 for row_pre in rows_pre:
-                    # 代表相似資訊！
+                    # 代表相似資訊！去除掉
                     if cal_score(row_cur['CUI'], row_pre['CUI']) > threshold:
                         if whether_print:
-                            print(row_cur['CUI'])
-                        # 輸出一樣的CUI
+                            print(row_cur['CUI'])                        
                         rows_cur.remove(row_cur)
                         break
         now_cnt = 0
