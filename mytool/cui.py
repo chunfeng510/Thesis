@@ -3,8 +3,9 @@
 回傳 sematic type, CUI, position, negation
 可以使用sldi, sldiID兩種格式檔案
 '''
+from typing import Tuple
 from pymetamap import MetaMap
-from . import mmi_parser as mmip
+from mytool import mmi_parser as mmip
 mm = MetaMap.get_instance('/home/feng/public_mm/bin/metamap20')
 import csv
 # txt_file = "clinical_txt/1.txt"
@@ -48,8 +49,11 @@ def extract_sldi(txt_file, output=True):
     return cui_list
 def handle_index(original_index):
     original_index.split()
-def debug_extract_cui(patient_id, target_date):
-    input_txt_path = 'Clinical_Note/'+str(patient_id)+'/output/'+str(target_date)+'_o.txt'
+def debug_extract_cui(patient_id, target_date, input_path=''):
+    if input_path == '':
+        input_txt_path = 'Clinical_Note/'+str(patient_id)+'/output/'+str(target_date)+'_o.txt'
+    else:
+        input_txt_path = input_path
     print("-----Processing file : "+ input_txt_path+"-----")
     sents, lines = read_line(input_txt_path)
     index_list = range(1, lines+1)
@@ -95,7 +99,7 @@ def debug_extract_cui(patient_id, target_date):
     return cui_list
 
 
-def extract_sldiID(patient_id, number_of_note, output=True):
+def extract_sldiID(patient_id, number_of_note, output=True, no_filterd = False):
     '''
     update !!
     負責解析(mapping) txt 檔案中的每一個句子中的每一個term 到 一個 concept
@@ -109,7 +113,13 @@ def extract_sldiID(patient_id, number_of_note, output=True):
     for cnt in range(1, number_of_note+1):
         txt_file = 'Clinical_Note/'+str(patient_id)+'/output/'+str(cnt)+'_o.txt'
         # 80001/80001-1_o.txt
-        output_file_path = 'Clinical_Note/'+str(patient_id)+'/csv/'+str(cnt)+'.csv'
+        if no_filterd:
+            # 不指定，通通進來
+            output_file_path = 'Clinical_Note/'+str(patient_id)+'/csv_all/'+str(cnt)+'.csv'
+            
+        else:
+            output_file_path = 'Clinical_Note/'+str(patient_id)+'/csv/'+str(cnt)+'.csv'
+
         csvfile = open(output_file_path, 'w', newline='')
         writer = csv.writer(csvfile)
         writer.writerow(['CUI', 'ROW', 'POSITION', 'NEGATION', 'TEXT_TRIGGER','SMT', 'TRIGGER'])
@@ -118,7 +128,11 @@ def extract_sldiID(patient_id, number_of_note, output=True):
         # index_list = range(1, lines+1)
         # 將剛剛讀出的行內容List, 傳給 mm.extract_concepts 取出概念
         concepts, error = mm.extract_concepts(
-            filename=txt_file, word_sense_disambiguation=True, user_define_acronyms=True, file_format= 'sldiID',  )
+            filename=txt_file, word_sense_disambiguation=True, 
+            user_define_acronyms=True, file_format= 'sldiID', 
+            composite_phrase=4, ignore_word_order=True,
+            prefer_multiple_concepts=True, negated_setting=True,
+            term_processing=False, allow_concept_gap=False, )
         number_for_everyone = 0
         # 每個 concept 都有的數值, 紀錄現在印到了哪個 index
         # 每個 index 只會印一次
@@ -136,7 +150,7 @@ def extract_sldiID(patient_id, number_of_note, output=True):
                 if number_for_everyone != int(concept.index[3:6]) :
                     whether_print = True
                     number_for_everyone += 1 
-                if is_target_smt(concept) :
+                if is_target_smt(concept) or no_filterd :
                 # if True :
                     if whether_print:
                         if output:
@@ -243,6 +257,7 @@ def get_all_cui_list_unique(patient_id, date, output = True):
     csvfile = open(file_out, 'w', newline='')
     writer = csv.writer(csvfile)
     writer.writerow(['CUI', 'SMT'])
+    # writer.writerow(['CUI'])
     for cnt in range(1, date+1):
         txt_file =  'Clinical_Note/'+str(patient_id)+'/output/'+str(cnt)+'_o.txt'
         
@@ -251,7 +266,11 @@ def get_all_cui_list_unique(patient_id, date, output = True):
         index_list = range(1, lines+1)
         # 將剛剛讀出的行內容List, 傳給 mm.extract_concepts 取出概念
         concepts, error = mm.extract_concepts(
-            sents, index_list, word_sense_disambiguation=True, user_define_acronyms=True, file_format= 'sldiID')
+            sents, index_list, word_sense_disambiguation=True, 
+            user_define_acronyms=True, file_format= 'sldiID',
+            composite_phrase=4, ignore_word_order=True,
+            prefer_multiple_concepts=True, negated_setting=True,
+            term_processing=False, allow_concept_gap=False,)
 
         number_for_everyone = 0
         # 每個 concept 都有的數值, 紀錄現在印到了哪個 index
@@ -271,7 +290,7 @@ def get_all_cui_list_unique(patient_id, date, output = True):
                 if number_for_everyone != int(concept.index) :
                     whether_print = True
                     number_for_everyone += 1 
-                if is_target_smt(concept): 
+                if True: #is_target_smt(concept): 
                 # if True :
                     if whether_print:
                         if output:
@@ -287,7 +306,8 @@ def get_all_cui_list_unique(patient_id, date, output = True):
                     if concept.cui in seen:
                         pass
                     else:
-                        writer.writerow([concept.cui, concept.semtypes.replace('[', '').replace(']', '')])
+                        writer.writerow([concept.cui])
+                        # writer.writerow([concept.cui, concept.semtypes.replace('[', '').replace(']', '')])
                         seen.add(concept.cui)
                     # f.close()
 

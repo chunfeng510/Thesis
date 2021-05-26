@@ -48,23 +48,39 @@ def file_process(patient_id, total_days, id_insert = True):
 
         sen_after = [re.sub(r'★|■|#|@|\*|-|>|<', ' ', line) for line in sen_after]
         
-        sen_after = [re.sub(r'\\|\[|\]|\+|\$|%|\(|\)|\^|\!|＼|／|○|↓|\||▽|:|—|！|，|。|？|、|~|￥|…|（|）|＜|＞|&|╴|│', ' ', line) for line in sen_after]
+        sen_after = [re.sub(r'\\|\[|\]|\+|\$|%|\(|\)|\^|\!|＼|／|○|↓|\||▽|—|！|，|。|？|、|~|￥|…|（|）|＜|＞|&|╴|│', ' ', line) for line in sen_after]
 
         sen_after = [line.lstrip() for line in sen_after]
         while '\n' in sen_after:
             sen_after.remove('\n')
-        # while ' \n' in sen_after:
-        #     sen_after.remove(' \n')
+        while ' \n' in sen_after:
+            sen_after.remove(' \n')
 
         if id_insert:
             counter = len(sen_after)
+            # print(counter)
             for i in range(1,counter+1):
                 if i<10:
-                    sen_after[i-1]="SID00"+ str(i)+"|"+ sen_after[i-1]
+                    
+                    if len(sen_after[i-1]) is 0:
+                        sen_after[i-1]="SID00"+ str(i)+"|"+ sen_after[i-1]+'-\n'
+                    else:
+                        sen_after[i-1]="SID00"+ str(i)+"|"+ sen_after[i-1]
+
                 elif i<100:
-                    sen_after[i-1]="SID0"+ str(i)+"|"+ sen_after[i-1]
+                    
+                    if len(sen_after[i-1]) is 0:
+                        sen_after[i-1]="SID0"+ str(i)+"|"+ sen_after[i-1]+'-\n'
+                        
+                    else:
+                        sen_after[i-1]="SID0"+ str(i)+"|"+ sen_after[i-1]
+
                 else :
-                    sen_after[i-1]="SID"+ str(i)+"|"+ sen_after[i-1]
+
+                    if len(sen_after[i-1]) is 0:
+                        sen_after[i-1]="SID"+ str(i)+"|"+ sen_after[i-1]+'-\n'
+                    else:
+                        sen_after[i-1]="SID"+ str(i)+"|"+ sen_after[i-1]
 
         if id_insert:
             f = open(file_out,'w')
@@ -73,6 +89,11 @@ def file_process(patient_id, total_days, id_insert = True):
             print("Output file : ", file_out)
             print("Processing completed !")
         else:
+            counter = len(sen_after)
+            for i in range(1,counter+1):
+                if len(sen_after[i-1]) is 0:
+                    sen_after[i-1] += '-\n'
+
             f = open(file_out_2,'w')
             f.writelines(sen_after)
             f.close()
